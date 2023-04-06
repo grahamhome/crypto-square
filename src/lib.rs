@@ -23,8 +23,9 @@ impl Square {
         match self.0.len() {
             0..=2 => self.0.to_string(),
             _ => {
-                let (output_cols, encryption_cols) = self.nearest_factor().unwrap();
+                let (output_cols, encryption_cols) = Square::nearest_factor(self.0.len()).unwrap();
                 let encrypted_input = self.encrypted_input(encryption_cols);
+                // Format encrypted input into correctly-sized rows for output
                 let extra_chars = self.0.len() % output_cols;
                 let mut normal_row_count = self.0.len() / output_cols;
                 if extra_chars > 0 {
@@ -60,8 +61,7 @@ impl Square {
     /// Finds the factors of the plaintext length with the smallest distance (0 or 1).
     /// If no such factors exist for the plaintext length, returns factors of the
     /// next largest number that has such factors.
-    fn nearest_factor(&self) -> Option<(usize, usize)> {
-        let mut input_len = self.0.len();
+    fn nearest_factor(mut input_len: usize) -> Option<(usize, usize)> {
         let mut candidate: Option<(usize, usize)> = Square::factor(input_len);
         while !candidate.is_some() {
             input_len += 1;
@@ -71,7 +71,7 @@ impl Square {
     }
 
     /// Returns the factor pair with the smallest distance (0 or 1) for the given number, if any.
-    /// Largest factor is listed first.
+    /// Factors are listed in increasing order.
     fn factor(input_len: usize) -> Option<(usize, usize)> {
         (1..=((input_len as f64).sqrt().floor()) as usize)
             .rev()

@@ -1,3 +1,5 @@
+// Tests in this module provided by Exercism.org
+
 #[cfg(test)]
 mod tests {
     use crate::encrypt;
