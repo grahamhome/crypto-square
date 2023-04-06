@@ -46,8 +46,6 @@ impl Square {
                     .chain(
                         encrypted_input
                             .chars()
-                            .collect::<Vec<char>>()
-                            .into_iter()
                             .skip(normal_row_count * output_cols)
                             .collect::<Vec<char>>()
                             .chunks(output_cols - 1)
