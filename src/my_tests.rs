@@ -22,6 +22,17 @@ mod tests {
     }
 
     #[test]
+    fn padded_flat_chunks_works() {
+        assert_eq!(
+            padded_flat_chunks(String::from("thedogishappy"), 4),
+            "thed\n\
+             ogi \n\
+             sha \n\
+             ppy "
+        )
+    }
+
+    #[test]
     fn closest_factor_works() {
         assert_eq!(find_nearest_factor(3), Some(Square { cols: 2, rows: 2 }));
         assert_eq!(find_nearest_factor(5), Some(Square { cols: 3, rows: 2 }));

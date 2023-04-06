@@ -87,9 +87,9 @@ fn encoded_flat(input: String, cols: usize) -> String {
 /// Splits input text into equal-sized chunks, joins chunks into a space-separated string.
 fn padded_flat_chunks(input: String, cols: usize) -> String {
     // Build normal chunks
-    (0..((input.len() / cols) - (cols - input.len() % cols)))
-        .map(|i| String::from_iter(input.chars().skip(cols * 1).take(cols)))
-        .collect()
-    // // Build short chunks with 1 space padding
-    // ((cols-input.len() % cols)..cols)
+    let normal_row_count = ((input.len() / cols) - (cols - input.len() % cols));
+    (0..normal_row_count)
+        .map(|i| String::from_iter(input.chars().skip(cols * 1).take(cols))).chain(
+        input.chars().collect::<Vec<char>>().into_iter().skip(normal_row_count * cols).collect::<Vec<char>>().chunks(cols-1).map(|c| String::from_iter(c) + " ")
+    ).collect()
 }
