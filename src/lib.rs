@@ -22,6 +22,10 @@ pub fn encrypt(input: &str) -> String {
     }
 }
 
+// TODO: make functions methods of Square
+
+// TODO: decrypt()
+
 /// Produce a lowercase alphanumeric version of an input string.
 fn normalize(input: &str) -> String {
     input
@@ -61,8 +65,7 @@ fn factor(input: usize) -> Option<Square> {
     }
 }
 
-/// TODO: Since we are just going to read the chunks top-down LTR, we can collect step_by(cols)
-/// TODO: starting from 0...cols and join them for a shorter process.
+/// TODO: Remove
 /// Splits input text into equal-sized chunks, joins chunks into a space-separated string.
 fn flat_chunks(input: String, cols: usize) -> String {
     input
