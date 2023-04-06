@@ -3,21 +3,17 @@ mod tests {
     use crate::*;
 
     #[test]
-    fn flat_chunks_works() {
-        assert_eq!(
-            flat_chunks(String::from("thedogishappy"), 4),
-            "thed\n\
-             ogis\n\
-             happ\n\
-             y   "
-        )
-    }
-
-    #[test]
     fn encoded_flat_works() {
         assert_eq!(
             encoded_flat(String::from("thedogishappy"), 4),
             "tohyhgaeipdsp"
+        );
+        assert_eq!(
+            encoded_flat(
+                String::from("ifmanwasmeanttostayonthegroundgodwouldhavegivenusroots"),
+                8
+            ),
+            "imtgdvsfearwermayoogoanouuiontnnlvtwttddesaohghnsseoau"
         )
     }
 
@@ -25,10 +21,14 @@ mod tests {
     fn padded_flat_chunks_works() {
         assert_eq!(
             padded_flat_chunks(String::from("thedogishappy"), 4),
-            "thed\n\
-             ogi \n\
-             sha \n\
-             ppy "
+            "thed ogi  sha  ppy "
+        );
+        assert_eq!(
+            padded_flat_chunks(
+                String::from("imtgdvsfearwermayoogoanouuiontnnlvtwttddesaohghnsseoau"),
+                7
+            ),
+            "imtgdvs fearwer mayoogo anouuio ntnnlvt wttddes aohghn  sseoau "
         )
     }
 
@@ -48,7 +48,7 @@ mod tests {
     fn factors_work() {
         assert_eq!(factor(0), None);
         assert_eq!(factor(1), Some(Square { cols: 1, rows: 1 }));
-        assert_eq!(factor(2), Some(Square { cols: 2, rows: 2 }));
+        assert_eq!(factor(2), Some(Square{ cols: 2, rows: 1}));
         assert_eq!(factor(3), None);
         assert_eq!(factor(4), Some(Square { cols: 2, rows: 2 }));
         assert_eq!(factor(5), None);

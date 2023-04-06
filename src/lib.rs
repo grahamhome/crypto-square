@@ -10,21 +10,15 @@ struct Square {
 pub fn encrypt(input: &str) -> String {
     let normalized_input: String = normalize(input);
     match normalized_input.len() {
-        0 => String::new(),
-        1 => input.to_string(),
+        0..=2 => normalized_input.to_string(),
         n => {
             let Square { cols, rows } = find_nearest_factor(n).unwrap();
-            let encoded_flat = encoded_flat(normalized_input, cols);
-            encoded_flat // TODO: Remove
-                         // TODO: Produce output chunks with missing chars spread out
-                         // TODO: Join chunks with space buffers
+            padded_flat_chunks(encoded_flat(normalized_input, cols), rows)
         }
     }
 }
 
 // TODO: make functions methods of Square
-
-// TODO: decrypt()
 
 /// Produce a lowercase alphanumeric version of an input string.
 fn normalize(input: &str) -> String {
@@ -48,34 +42,18 @@ fn find_nearest_factor(mut input: usize) -> Option<Square> {
 
 /// Find a factor pair for the given number with the smallest distance, either 0 or 1.
 fn factor(input: usize) -> Option<Square> {
-    match input {
-        2 => Some(Square { cols: 2, rows: 2 }),
-        n => (1..=((input as f64).sqrt().floor()) as usize)
-            .rev()
-            .find_map(|c| {
-                if input % c == 0 && input / c - c <= 1_usize {
-                    Some(Square {
-                        rows: c,
-                        cols: input / c,
-                    })
-                } else {
-                    None
-                }
-            }),
-    }
-}
-
-/// TODO: Remove
-/// Splits input text into equal-sized chunks, joins chunks into a space-separated string.
-fn flat_chunks(input: String, cols: usize) -> String {
-    input
-        .chars()
-        .collect::<Vec<char>>()
-        .chunks(cols)
-        .map(|c| String::from_iter(c))
-        .collect::<Vec<String>>()
-        .join("\n")
-        + " ".repeat(cols - input.len() % cols).as_str()
+    (1..=((input as f64).sqrt().floor()) as usize)
+        .rev()
+        .find_map(|c| {
+            if input % c == 0 && input / c - c <= 1_usize {
+                Some(Square {
+                    rows: c,
+                    cols: input / c,
+                })
+            } else {
+                None
+            }
+        })
 }
 
 fn encoded_flat(input: String, cols: usize) -> String {
@@ -85,11 +63,32 @@ fn encoded_flat(input: String, cols: usize) -> String {
 }
 
 /// Splits input text into equal-sized chunks, joins chunks into a space-separated string.
+/// Trailing whitepace padding is evenly distributed between final rows.
 fn padded_flat_chunks(input: String, cols: usize) -> String {
-    // Build normal chunks
-    let normal_row_count = ((input.len() / cols) - (cols - input.len() % cols));
+    let has_short_rows = input.len() % cols != 0;
+    let normal_row_count = (input.len() / cols) + {
+        if has_short_rows {
+            1
+        } else {
+            0
+        }
+    } - if has_short_rows {
+        cols - (input.len() % cols)
+    } else {
+        0
+    };
     (0..normal_row_count)
-        .map(|i| String::from_iter(input.chars().skip(cols * 1).take(cols))).chain(
-        input.chars().collect::<Vec<char>>().into_iter().skip(normal_row_count * cols).collect::<Vec<char>>().chunks(cols-1).map(|c| String::from_iter(c) + " ")
-    ).collect()
+        .map(|i| String::from_iter(input.chars().skip(cols * i).take(cols)))
+        .chain(
+            input
+                .chars()
+                .collect::<Vec<char>>()
+                .into_iter()
+                .skip(normal_row_count * cols)
+                .collect::<Vec<char>>()
+                .chunks(cols - 1)
+                .map(|c| String::from_iter(c) + " "),
+        )
+        .collect::<Vec<String>>()
+        .join(" ")
 }
