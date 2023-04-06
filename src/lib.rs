@@ -8,8 +8,8 @@ struct Square(String);
 impl Square {
     /// Creates a new crypto square with the given plaintext.
     fn new(input: &str) -> Square {
-        // Normalize plaintext to a lowercase alphanumeric string
         Square(
+            // Normalize plaintext to a lowercase alphanumeric string
             input
                 .to_lowercase()
                 .chars()
