@@ -25,10 +25,10 @@ impl Square {
             _ => {
                 let (output_cols, encryption_cols) = self.nearest_factor().unwrap();
                 let encrypted_input = self.encrypted_input(encryption_cols);
-                let has_short_rows = self.0.len() % output_cols != 0;
+                let extra_chars = self.0.len() % output_cols;
                 let normal_row_count = (self.0.len() / output_cols)
-                    - if has_short_rows {
-                        output_cols - 1 - (self.0.len() % output_cols)
+                    - if extra_chars > 0 {
+                        output_cols - 1 - extra_chars
                     } else {
                         0
                     };
