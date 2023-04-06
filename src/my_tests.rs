@@ -3,6 +3,25 @@ mod tests {
     use crate::*;
 
     #[test]
+    fn flat_chunks_works() {
+        assert_eq!(
+            flat_chunks(String::from("thedogishappy"), 4),
+            "thed\n\
+             ogis\n\
+             happ\n\
+             y   "
+        )
+    }
+
+    #[test]
+    fn encoded_flat_works() {
+        assert_eq!(
+            encoded_flat(String::from("thedogishappy"), 4),
+            "tohyhgaeipdsp"
+        )
+    }
+
+    #[test]
     fn closest_factor_works() {
         assert_eq!(find_nearest_factor(3), Some(Square { cols: 2, rows: 2 }));
         assert_eq!(find_nearest_factor(5), Some(Square { cols: 3, rows: 2 }));
@@ -10,6 +29,7 @@ mod tests {
         assert_eq!(find_nearest_factor(8), Some(Square { cols: 3, rows: 3 }));
         assert_eq!(find_nearest_factor(10), Some(Square { cols: 4, rows: 3 }));
         assert_eq!(find_nearest_factor(11), Some(Square { cols: 4, rows: 3 }));
+        assert_eq!(find_nearest_factor(13), Some(Square { cols: 4, rows: 4 }));
         assert_eq!(find_nearest_factor(15), Some(Square { cols: 4, rows: 4 }));
     }
 
