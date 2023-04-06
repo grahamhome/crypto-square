@@ -2,93 +2,96 @@ mod my_tests;
 mod tests;
 
 #[derive(Eq, PartialEq, Debug)]
-struct Square {
-    rows: usize,
-    cols: usize,
+/// A crypto square.
+struct Square(String);
+
+impl Square {
+    /// Creates a new crypto square with the given plaintext.
+    fn new(input: &str) -> Square {
+        // Normalize plaintext to a lowercase alphanumeric string
+        Square(
+            input
+                .to_lowercase()
+                .chars()
+                .filter(|c| c.is_alphanumeric())
+                .collect(),
+        )
+    }
+
+    /// Returns the square's ciphertext.
+    pub fn encrypt(&self) -> String {
+        match self.0.len() {
+            0..=2 => self.0.to_string(),
+            _ => {
+                let (output_cols, encryption_cols) = self.nearest_factor().unwrap();
+                let encrypted_input = self.encrypted_input(encryption_cols);
+                let has_short_rows = self.0.len() % output_cols != 0;
+                let normal_row_count = (self.0.len() / output_cols)
+                    - if has_short_rows {
+                        output_cols - 1 - (self.0.len() % output_cols)
+                    } else {
+                        0
+                    };
+                (0..normal_row_count)
+                    .map(|i| {
+                        String::from_iter(
+                            encrypted_input
+                                .chars()
+                                .skip(output_cols * i)
+                                .take(output_cols),
+                        )
+                    })
+                    .chain(
+                        encrypted_input
+                            .chars()
+                            .collect::<Vec<char>>()
+                            .into_iter()
+                            .skip(normal_row_count * output_cols)
+                            .collect::<Vec<char>>()
+                            .chunks(output_cols - 1)
+                            .map(|c| String::from_iter(c) + " "),
+                    )
+                    .collect::<Vec<String>>()
+                    .join(" ")
+            }
+        }
+    }
+
+    /// Finds the factors of the plaintext length with the smallest distance (0 or 1).
+    /// If no such factors exist for the plaintext length, returns factors of the
+    /// next largest number that has such factors.
+    fn nearest_factor(&self) -> Option<(usize, usize)> {
+        let mut input_len = self.0.len();
+        let mut candidate: Option<(usize, usize)> = Square::factor(input_len);
+        while !candidate.is_some() {
+            input_len += 1;
+            candidate = Square::factor(input_len);
+        }
+        candidate
+    }
+
+    /// Returns the factor pair with the smallest distance (0 or 1) for the given number, if any.
+    /// Largest factor is listed first.
+    fn factor(input_len: usize) -> Option<(usize, usize)> {
+        (1..=((input_len as f64).sqrt().floor()) as usize)
+            .rev()
+            .find_map(|c| {
+                if input_len % c == 0 && input_len / c - c <= 1_usize {
+                    Some((c, input_len / c))
+                } else {
+                    None
+                }
+            })
+    }
+
+    /// Applies the square encryption method to the plaintext and returns the resulting ciphertext.
+    fn encrypted_input(&self, cols: usize) -> String {
+        (0..cols)
+            .map(|i| self.0.chars().skip(i).step_by(cols).collect::<String>())
+            .collect()
+    }
 }
 
 pub fn encrypt(input: &str) -> String {
-    let normalized_input: String = normalize(input);
-    match normalized_input.len() {
-        0..=2 => normalized_input.to_string(),
-        n => {
-            let Square { cols, rows } = find_nearest_factor(n).unwrap();
-            padded_flat_chunks(encoded_flat(normalized_input, cols), rows)
-        }
-    }
-}
-
-// TODO: make functions methods of Square
-
-/// Produce a lowercase alphanumeric version of an input string.
-fn normalize(input: &str) -> String {
-    input
-        .to_lowercase()
-        .chars()
-        .filter(|c| c.is_alphanumeric())
-        .collect()
-}
-
-/// Finds the factor of the nearest number to the input.
-/// Returns the factor and the distance.
-fn find_nearest_factor(mut input: usize) -> Option<Square> {
-    let mut candidate: Option<Square> = factor(input);
-    while !candidate.is_some() {
-        input += 1;
-        candidate = factor(input);
-    }
-    candidate.map(|c| (c))
-}
-
-/// Find a factor pair for the given number with the smallest distance, either 0 or 1.
-fn factor(input: usize) -> Option<Square> {
-    (1..=((input as f64).sqrt().floor()) as usize)
-        .rev()
-        .find_map(|c| {
-            if input % c == 0 && input / c - c <= 1_usize {
-                Some(Square {
-                    rows: c,
-                    cols: input / c,
-                })
-            } else {
-                None
-            }
-        })
-}
-
-fn encoded_flat(input: String, cols: usize) -> String {
-    (0..cols)
-        .map(|i| input.chars().skip(i).step_by(cols).collect::<String>())
-        .collect()
-}
-
-/// Splits input text into equal-sized chunks, joins chunks into a space-separated string.
-/// Trailing whitepace padding is evenly distributed between final rows.
-fn padded_flat_chunks(input: String, cols: usize) -> String {
-    let has_short_rows = input.len() % cols != 0;
-    let normal_row_count = (input.len() / cols) + {
-        if has_short_rows {
-            1
-        } else {
-            0
-        }
-    } - if has_short_rows {
-        cols - (input.len() % cols)
-    } else {
-        0
-    };
-    (0..normal_row_count)
-        .map(|i| String::from_iter(input.chars().skip(cols * i).take(cols)))
-        .chain(
-            input
-                .chars()
-                .collect::<Vec<char>>()
-                .into_iter()
-                .skip(normal_row_count * cols)
-                .collect::<Vec<char>>()
-                .chunks(cols - 1)
-                .map(|c| String::from_iter(c) + " "),
-        )
-        .collect::<Vec<String>>()
-        .join(" ")
+    Square::new(input).encrypt()
 }
