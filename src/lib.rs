@@ -26,12 +26,12 @@ impl Square {
                 let (output_cols, encryption_cols) = self.nearest_factor().unwrap();
                 let encrypted_input = self.encrypted_input(encryption_cols);
                 let extra_chars = self.0.len() % output_cols;
-                let normal_row_count = (self.0.len() / output_cols)
-                    - if extra_chars > 0 {
-                        output_cols - 1 - extra_chars
-                    } else {
-                        0
-                    };
+                let normal_row_count = if extra_chars > 0 {
+                    (self.0.len() / output_cols) + extra_chars + 1 - output_cols
+                } else {
+                    self.0.len() / output_cols
+                };
+                // Build full-length rows
                 (0..normal_row_count)
                     .map(|i| {
                         String::from_iter(
@@ -41,6 +41,7 @@ impl Square {
                                 .take(output_cols),
                         )
                     })
+                    // Build truncated rows
                     .chain(
                         encrypted_input
                             .chars()
